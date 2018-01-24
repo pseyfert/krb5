@@ -222,15 +222,17 @@ warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
         return;
 
     delta = ts_delta(pw_exp, now);
-    if (delta < 3600) {
+    if (delta < 3600) { // less than 1 hour
         snprintf(banner, sizeof(banner),
                  _("Warning: Your password will expire in less than one hour "
                    "on %s"), ts);
-    } else if (delta < 86400*2) {
-        snprintf(banner, sizeof(banner),
-                 _("Warning: Your password will expire in %d hour%s on %s"),
-                 delta / 3600, delta < 7200 ? "" : "s", ts);
-    } else {
+    } else if (delta < 86400*2) { // 1 to 48 hours (i.e. hours can be singular, but not zero)
+        snprintf(banner, sizeof( banner ),
+                 ngettext("Warning: Your password will expire in %d hour on %s",
+                          "Warning: Your password will expire in %d hours on %s",
+                          delta / 3600 ),
+                 delta / 3600, ts );
+    } else { // more than 48 hours (i.e. number of days is never singular)
         snprintf(banner, sizeof(banner),
                  _("Warning: Your password will expire in %d days on %s"),
                  delta / 86400, ts);
